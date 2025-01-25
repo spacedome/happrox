@@ -7,25 +7,11 @@ someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
 -- Chebyshev is defined on the interval [-1,1]
--- We use Chebyshev polynomials of the second kind, ie with extremal points
--- type Cheb = V.Vector Double
--- type ChebNodes = V.Vector Double
+-- We use Chebyshev polynomials of the first kind
 type Cheb = [Double]
 type ChebNodes = [Double]
 newtype Function = Function {evaluate :: Double -> Double}
 
--- chebyshevNodes :: Int -> ChebNodes
--- chebyshevNodes n = V.generate n (\k -> cos ((2 * fromIntegral k + 1) * pi / (2 * fromIntegral n)))
-
--- evalChebAtPoint :: Cheb -> Double -> Double
--- evalChebAtPoint coeffs x
---   | V.null coeffs = 0  -- No coefficients, return 0
---   | otherwise = go (V.length coeffs - 1) 0 0
---   where
---     -- Clenshaw algorithm
---     go k b1 b2
---       | k < 0     = b1  -- Base case: recursion complete
---       | otherwise = go (k - 1) (V.unsafeIndex coeffs k + 2 * x * b1 - b2) b1
 
 -- SEE: https://hackage.haskell.org/package/math-functions-0.3.4.4/docs/Numeric-Polynomial-Chebyshev.html
 evalChebAtPoint :: [Double] -> Double -> Double
