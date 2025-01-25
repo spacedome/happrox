@@ -69,6 +69,7 @@ library
 
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.18.2.1
+                    , vector ^>=0.13
 
     -- Directories containing source files.
     hs-source-dirs:   src
@@ -92,7 +93,8 @@ executable cheboid
     -- Other library packages from which modules are imported.
     build-depends:
         base ^>=4.18.2.1,
-        cheboid
+        cheboid,
+        vector ^>=0.13
 
     -- Directories containing source files.
     hs-source-dirs:   app
@@ -125,4 +127,6 @@ test-suite cheboid-test
     -- Test dependencies.
     build-depends:
         base ^>=4.18.2.1,
-        cheboid
+        cheboid,
+        tasty ^>=1.5.3,
+        tasty-hunit ^>= 0.10.2
