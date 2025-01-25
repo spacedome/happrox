@@ -10,10 +10,10 @@ tests = testGroup "Tests" [unitTests]
 
 -- x^4
 chebX4 :: Cheb
-chebX4 = [0.375, 0.0, 0.5, 0.0, 0.125]
+chebX4 = Cheb [0.375, 0.0, 0.5, 0.0, 0.125]
 -- x
 chebX1 :: Cheb
-chebX1 = [0.0, 1.0] :: Cheb
+chebX1 = Cheb [0.0, 1.0]
 
 testChebAtPoint :: Cheb -> String -> Double -> Double -> TestTree
 testChebAtPoint cheb name x xe = 
@@ -21,7 +21,8 @@ testChebAtPoint cheb name x xe =
   where tip = name <> " at " <> show x
         err = abs (xe - evalChebAtPoint cheb x)
 
-unitTests = testGroup "Unit tests"
+unitTests :: TestTree
+unitTests = testGroup ""
   [ testChebAtPoint chebX1 "X1" 0.0 0.0,
     testChebAtPoint chebX1 "X1" 0.5 0.5,
     testChebAtPoint chebX1 "X1" (-1.0) (-1.0),

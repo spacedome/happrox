@@ -1,23 +1,23 @@
-module MyLib (Cheb, evalChebAtPoint) where
+module MyLib (Cheb (Cheb), evalChebAtPoint) where
 -- import qualified Data.Vector as V
 import Numeric.Natural
 
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
 
 -- Chebyshev is defined on the interval [-1,1]
 -- We use Chebyshev polynomials of the first kind
-type Cheb = [Double]
+newtype Cheb = Cheb {getCoef :: [Double]}
 type ChebNodes = [Double]
 newtype Function = Function {evaluate :: Double -> Double}
 
+x :: Cheb
+x = Cheb [1.0, 2.0]
 
 -- SEE: https://hackage.haskell.org/package/math-functions-0.3.4.4/docs/Numeric-Polynomial-Chebyshev.html
-evalChebAtPoint :: [Double] -> Double -> Double
-evalChebAtPoint a x = fini . foldr step (0, 0) . tail $ a
+evalChebAtPoint :: Cheb -> Double -> Double
+evalChebAtPoint a x = fini . foldr step (0, 0) . tail $ getCoef a
     where step k (b0, b1) = (,) (k + 2 * x * b0 - b1) b0
-          fini   (b0, b1) = head a + x * b0 - b1
+          fini   (b0, b1) = head (getCoef a) + x * b0 - b1
 
 computeCheb :: Function -> Natural -> Cheb
 computeCheb = undefined
