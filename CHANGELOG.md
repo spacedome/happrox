@@ -1,4 +1,4 @@
-# Revision history for cheboid
+# Revision history for happrox
 
 ## 0.1.0.0 -- YYYY-mm-dd
 

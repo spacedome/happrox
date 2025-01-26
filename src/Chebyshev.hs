@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds #-}
 
-module MyLib (Cheb (Cheb), extremalChebNodes, evalChebAtPoint, computeCheb, Function (Function)) where
+module Chebyshev (Cheb (Cheb), extremalChebNodes, evalChebAtPoint, computeCheb, Function (Function)) where
 -- import qualified Data.Vector as V
 import Numeric.Natural
 

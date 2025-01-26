@@ -1,6 +1,6 @@
 module Main where
 
-import MyLib (Cheb (Cheb), evalChebAtPoint, extremalChebNodes, computeCheb, Function (Function))
+import Chebyshev
 -- import qualified Data.Vector as V
 
 -- x^4

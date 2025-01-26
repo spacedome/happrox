@@ -1,7 +1,7 @@
 module Main (main) where
 import Test.Tasty
 import Test.Tasty.HUnit
-import MyLib 
+import Chebyshev
 main :: IO ()
 main = defaultMain tests
 
