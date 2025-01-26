@@ -1,12 +1,14 @@
 module Main where
 
-import MyLib (Cheb, evalChebAtPoint)
+import MyLib (Cheb (Cheb), evalChebAtPoint, extremalChebNodes, computeCheb, Function (Function))
 -- import qualified Data.Vector as V
 
 -- x^4
 chebX4 :: Cheb
-chebX4 = [0.375, 0.0, 0.5, 0.0, 0.125]
+chebX4 = Cheb [0.375, 0.0, 0.5, 0.0, 0.125]
+x4 :: Function
+x4 = Function (**4)
 
 main :: IO ()
 main = do
-  print (evalChebAtPoint chebX4 1.0)
+  print (computeCheb x4 4)
