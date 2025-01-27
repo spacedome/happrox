@@ -1,32 +1,9 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds #-}
 
 module Chebyshev (Cheb (Cheb), extremalChebNodes, evalChebAtPoint, computeCheb, Function (Function)) where
--- import qualified Data.Vector as V
+
 import Numeric.Natural
-
-
 import Data.Complex
-
-split :: [a] -> ([a], [a])
-split [] = ([], [])
-split [_] = error "input size must be power of two"
-split (x:y:xs) =
-  let (es, os) = split xs
-  in (x:es, y:os)
-
-mergeRadix2 :: [Complex Double] -> [Complex Double] -> Int -> [Complex Double]
-mergeRadix2 es os n = (++) (zipWith (+) es qs) (zipWith (-) es qs)
-  where qs = zipWith (*) os ws
-        ws = [exp (0.0 :+ (-2.0 * pi * fromIntegral k / fromIntegral n )) | k <- [0..length es -1]]
-
-fft :: [Complex Double] -> [Complex Double]
-fft [] = []
-fft [z] = [z]
-fft zs = mergeRadix2 (fft evens) (fft odds) (length zs)
-  where (evens, odds) = split zs
-
-rfft :: [Double] -> [Double]
-rfft  = fmap realPart . fft . fmap (:+ 0.0)
 
 
 -- Chebyshev is defined on the interval [-1,1]
@@ -53,6 +30,7 @@ computeCheb f n = Cheb (scaleCoef c)
 
 -- adapted from the implementation in math-functions
 -- SEE: https://hackage.haskell.org/package/math-functions-0.3.4.4/docs/Numeric-Polynomial-Chebyshev.html
+-- Evaluate using Clenshaw algorithm
 evalChebAtPoint :: Cheb -> Double -> Double
 evalChebAtPoint a x = fini . foldr step (0, 0) . tail $ getCoef a
     where step k (b0, b1) = (,) (k + 2 * x * b0 - b1) b0
@@ -76,3 +54,26 @@ integrate = undefined
 -- TODO: 
 -- TODO: 
 -- TODO: 
+
+
+-- FFT ---------------------------------------------------------------
+split :: [a] -> ([a], [a])
+split [] = ([], [])
+split [_] = error "input size must be power of two"
+split (x:y:xs) =
+  let (es, os) = split xs
+  in (x:es, y:os)
+
+mergeRadix2 :: [Complex Double] -> [Complex Double] -> Int -> [Complex Double]
+mergeRadix2 es os n = (++) (zipWith (+) es qs) (zipWith (-) es qs)
+  where qs = zipWith (*) os ws
+        ws = [exp (0.0 :+ (-2.0 * pi * fromIntegral k / fromIntegral n )) | k <- [0..length es -1]]
+
+fft :: [Complex Double] -> [Complex Double]
+fft [] = []
+fft [z] = [z]
+fft zs = mergeRadix2 (fft evens) (fft odds) (length zs)
+  where (evens, odds) = split zs
+
+rfft :: [Double] -> [Double]
+rfft  = fmap realPart . fft . fmap (:+ 0.0)
