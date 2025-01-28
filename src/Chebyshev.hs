@@ -36,26 +36,6 @@ evalChebAtPoint a x = fini . foldr step (0, 0) . tail $ getCoef a
     where step k (b0, b1) = (,) (k + 2 * x * b0 - b1) b0
           fini   (b0, b1) = head (getCoef a) + x * b0 - b1
 
--- need to decide on which norm to use
-approxError :: Function -> Cheb -> Double
-approxError = undefined
-
--- These could be type classes ? idk probably no reason to
-differentiate :: Cheb -> Cheb
-differentiate = undefined
-integrate :: Cheb -> Cheb
-integrate = undefined
-
--- TODO: Functor to map over Cheb
--- TODO: Applicative to add or multiply two Cheb 
--- TODO: Parallel execution?
--- TODO: rootfinding
--- TODO: https://github.com/timbod7/haskell-chart
--- TODO: 
--- TODO: 
--- TODO: 
-
-
 -- FFT ---------------------------------------------------------------
 split :: [a] -> ([a], [a])
 split [] = ([], [])
