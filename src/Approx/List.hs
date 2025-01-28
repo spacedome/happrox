@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds #-}
 
+-- This module has some list based algorithms
 module Approx.List (Cheb (Cheb), extremalChebNodes, evalChebAtPoint, computeCheb, Function (Function)) where
 
 import Data.Complex
