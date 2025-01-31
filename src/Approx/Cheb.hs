@@ -3,6 +3,7 @@ module Approx.Cheb where
 import Numeric.GSL.Fourier
 import Numeric.LinearAlgebra.Data
 import Numeric.Natural
+import qualified Data.Vector.Generic as V
 
 -- we typically represent using (extremal) nodes and not coefficients
 -- this has numerous benefits, and we can go bewteen representations as needed
@@ -12,15 +13,19 @@ type ChebCoefs = Vector R
 newtype Function = Function {evalF :: R -> R}
 
 extremalChebNodes :: Natural -> ChebNodes
-extremalChebNodes n = build (fromIntegral n + 1) (\x -> -cos (pi * x / fromIntegral n))
+extremalChebNodes n = build (fromIntegral n + 1) (\x -> cos (pi * x / fromIntegral n))
 
 -- TODO: make size dynamic based on convergence
 computeCheb :: Function -> Natural -> Cheb
 computeCheb f n = Cheb (cmap (evalF f) (extremalChebNodes n))
 
 getCoef :: Cheb -> ChebCoefs
--- NOTE: this is wrong
-getCoef = cmap realPart . fft . complex . getNodes
+getCoef (Cheb nodes) = filtered
+  where reflected = nodes <> (V.reverse . V.tail . V.init) nodes
+        frequency = V.take (V.length nodes) ((cmap realPart . fft . complex) reflected)
+        scaled    = cmap (/ fromIntegral (V.length frequency - 1)) frequency
+        scaled2   = scaled V.// [(0, 2 * V.head scaled), (V.length scaled - 1, V.last scaled)]
+        filtered  = cmap (\x -> if abs x > 1e-14 then x else 0.0 ) scaled2
 
 chebDf :: Natural -> Matrix R
 chebDf dim = build (m, m) f
@@ -43,3 +48,7 @@ chebDf dim = build (m, m) f
       | otherwise = 1
 
 discreteChebTransform :: Cheb -> ChebCoefs
+discreteChebTransform = undefined
+
+-- [1.0,0.7071067811865476,6.123233995736766e-17,-0.7071067811865475,-1.0,
+-- -0.7071067811865477,-1.8369701987210297e-16,0.7071067811865474]
