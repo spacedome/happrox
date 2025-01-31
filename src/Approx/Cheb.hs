@@ -49,6 +49,3 @@ chebDf dim = build (m, m) f
 
 discreteChebTransform :: Cheb -> ChebCoefs
 discreteChebTransform = undefined
-
--- [1.0,0.7071067811865476,6.123233995736766e-17,-0.7071067811865475,-1.0,
--- -0.7071067811865477,-1.8369701987210297e-16,0.7071067811865474]
