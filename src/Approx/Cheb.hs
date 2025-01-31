@@ -24,7 +24,7 @@ getCoef (Cheb nodes) = filtered
   where reflected = nodes <> (V.reverse . V.tail . V.init) nodes
         frequency = V.take (V.length nodes) ((cmap realPart . fft . complex) reflected)
         scaled    = cmap (/ fromIntegral (V.length frequency - 1)) frequency
-        scaled2   = scaled V.// [(0, 2 * V.head scaled), (V.length scaled - 1, V.last scaled)]
+        scaled2   = scaled V.// [(0, 0.5 * V.head scaled), (V.length scaled - 1, 0.5 * V.last scaled)]
         filtered  = cmap (\x -> if abs x > 1e-14 then x else 0.0 ) scaled2
 
 chebDf :: Natural -> Matrix R
