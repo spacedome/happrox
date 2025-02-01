@@ -1,6 +1,18 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds #-}
 
--- This module has some list based algorithms
+{-|
+Module      : Approx.List
+Description : Examples of approximation methods
+Copyright   : (c) Julien Brenneck 2025
+License     : MIT
+Maintainer  : julien@spacedome.tv
+Stability   : experimental
+Portability : POSIX
+
+This module includes pedagogical examples of approximation algorithms,
+backed by Lists, without further dependencies, meant for clarity not performance.
+-}
+
 module Approx.List (Cheb (Cheb), extremalChebNodes, evalChebAtPoint, computeCheb, Function (Function)) where
 
 import Data.Complex

@@ -1,3 +1,15 @@
+{-|
+Module      : Approx.Cheb
+Description : Chebyshev approximating polynomials
+Copyright   : (c) Julien Brenneck 2025
+License     : MIT
+Maintainer  : julien@spacedome.tv
+Stability   : experimental
+Portability : POSIX
+
+This module provides Chebyshev approximants backed by Vectors, using hmatrix.
+-}
+
 module Approx.Cheb where
 
 import Numeric.GSL.Fourier
@@ -5,28 +17,45 @@ import Numeric.LinearAlgebra.Data
 import Numeric.Natural
 import qualified Data.Vector.Generic as V
 
--- we typically represent using (extremal) nodes and not coefficients
--- this has numerous benefits, and we can go bewteen representations as needed
+{- Cheb - representation of our Chebyshev approximation.
+ We store this using a sample at the extremal nodes, and not coefficients, following Chebfun.
+ This has numerous benefits, and we can go bewteen representations as needed -}
 newtype Cheb = Cheb {getNodes :: Vector R}
 type ChebNodes = Vector R
 type ChebCoefs = Vector R
+-- | Function to sample from in computing a Cheb
 newtype Function = Function {evalF :: R -> R}
 
+-- | Compute the Nth extremal nodes, i.e. the interpolation points for our Cheb
 extremalChebNodes :: Natural -> ChebNodes
 extremalChebNodes n = build (fromIntegral n + 1) (\x -> cos (pi * x / fromIntegral n))
 
 -- TODO: make size dynamic based on convergence
+{- | Compute a Cheb representation of a Function. -}
 computeCheb :: Function -> Natural -> Cheb
 computeCheb f n = Cheb (cmap (evalF f) (extremalChebNodes n))
 
-getCoef :: Cheb -> ChebCoefs
-getCoef (Cheb nodes) = filtered
+
+{- | Get the Chebyshev coefficients of a Cheb
+This uses the FFT and is sometimes called the "Discrete Chebyshev Transform"
+
+>> getChebCoef (computeCheb (Function (**4)) 4)
+[0.575, 0.0, 0.5, 0.0, 0.125]
+-}
+getChebCoef :: Cheb -> ChebCoefs
+getChebCoef (Cheb nodes) = filtered
+  -- None of the literature seems to mention this, but computing the coefficients
+  -- from the extremal nodes doesn't seem to work without this reflection trick
   where reflected = nodes <> (V.reverse . V.tail . V.init) nodes
         frequency = V.take (V.length nodes) ((cmap realPart . fft . complex) reflected)
+        -- this FFT library does not normalize output, so we divide by N
         scaled    = cmap (/ fromIntegral (V.length frequency - 1)) frequency
+        -- outermost points must be scaled by an additional factor of two
         scaled2   = scaled V.// [(0, 0.5 * V.head scaled), (V.length scaled - 1, 0.5 * V.last scaled)]
+        -- might as well get rid of things near numerical zero, should improve stability
         filtered  = cmap (\x -> if abs x > 1e-14 then x else 0.0 ) scaled2
 
+-- | Compute the first order Chebyshev differentiation matrix
 chebDf :: Natural -> Matrix R
 chebDf dim = build (m, m) f
  where
@@ -46,6 +75,3 @@ chebDf dim = build (m, m) f
       | z == 0 = 2
       | z == n = 2
       | otherwise = 1
-
-discreteChebTransform :: Cheb -> ChebCoefs
-discreteChebTransform = undefined
