@@ -55,6 +55,22 @@ getChebCoef (Cheb nodes) = filtered
         -- might as well get rid of things near numerical zero, should improve stability
         filtered  = cmap (\x -> if abs x > 1e-14 then x else 0.0 ) scaled2
 
+{- | Go from coefficients back to extremal node samples
+
+>> inverseChebCoef (getChebCoef (computeCheb (Function (**4)) 4))
+[1.0, 0.5, 0.0, 0.5, 1.0]
+-}
+inverseChebCoef :: ChebCoefs -> Cheb
+inverseChebCoef coef = Cheb frequency
+  where rescaled  = coef V.// [(0, 2.0 * V.head coef), (V.length coef - 1, 2.0 * V.last coef)]
+        -- undo the scaling steps
+        rescaled2 = cmap (* fromIntegral (V.length rescaled - 1)) rescaled
+        -- do the reflection trick again (this works in both directions)
+        reflected = rescaled2 <> (V.reverse . V.tail . V.init) rescaled2
+        -- ifft and you're back
+        frequency = V.take (V.length coef) ((cmap realPart . ifft . complex) reflected)
+
+
 -- | Compute the first order Chebyshev differentiation matrix
 chebDf :: Natural -> Matrix R
 chebDf dim = build (m, m) f
