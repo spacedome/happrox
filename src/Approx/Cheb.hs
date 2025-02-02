@@ -14,6 +14,7 @@ module Approx.Cheb where
 
 import Numeric.GSL.Fourier
 import Numeric.LinearAlgebra.Data
+import Numeric.LinearAlgebra ((#>))
 import Numeric.Natural
 import qualified Data.Vector.Generic as V
 
@@ -83,16 +84,20 @@ chebDf dim = build (m, m) f
     | (i, j) == (0, 0) = (2 * n ** 2 + 1) / 6
     | (i, j) == (n, n) = -(2 * n ** 2 + 1) / 6
     | i == j = -xi / (2 * (1 - xi ** 2))
-    | otherwise = (-1 ** (i + j)) * c i / (c j * (xi - xj))
-   where
-    -- hmatrix `build` only takes R -> R -> R so we have to round...
-    xi = x ! round i :: R
-    xj = x ! round j :: R
-    c z
-      | z == 0 = 2
-      | z == n = 2
-      | otherwise = 1
+    | otherwise = ((-1) ** (i + j)) * c i / (c j * (xi - xj))
+     where
+      -- hmatrix `build` only takes R -> R -> R so we have to round...
+      xi = x ! round i
+      xj = x ! round j
+      c z
+        | z == 0 = 2
+        | z == n = 2
+        | otherwise = 1
 
+diffCheb :: Cheb -> Cheb
+diffCheb (Cheb c) = Cheb (d #> c)
+  where n = V.length c - 1
+        d = chebDf (fromIntegral n)
 
 data C = C {-# UNPACK #-} !R {-# UNPACK #-} !R
 {- | Evaluate a Chebyshev polynomial of the first kind. 
