@@ -6,7 +6,7 @@ import Graphics.Rendering.Chart.Backend.Diagrams
 import Graphics.Rendering.Chart.Easy
 
 main :: IO ()
-main = plotDerivative
+main = plotODE
 
 -- plot a Chebyshev interpolation of the classic function
 -- used to demonstrate Runge's phenomenon.
@@ -43,3 +43,19 @@ plotDerivative = toFile def "deriv.png" $ do
     func = fmap (clenshaw (getChebCoef c)) linrange
     func' = fmap (clenshaw (getChebCoef (diffCheb c))) linrange
     func'' = fmap (clenshaw (getChebCoef (diffCheb $ diffCheb c))) linrange
+
+    
+plotODE :: IO ()
+plotODE = toFile def "ode.png" $ do
+  layout_title .= "Sixth order solution of u'' = - sin (pi * x)"
+  setColors [opaque blue, opaque red, opaque green, opaque orange, opaque black]
+  plot (line "u" [zip linrange func])
+  plot (points "points" (zip nodes (fmap fe nodes)))
+  plot (line "exact" [zip linrange (fmap (\x -> sin (x * pi) / pi**2) linrange)])
+  where
+    fe x = sin (pi * x) / pi**2
+    linrange = [x / 100 | x <- [-100 .. 100]] :: [Double]
+    dl = DL (chebDf2 6) DirichletBC DirichletBC
+    u = dl <\\> Function (\x -> - sin (pi * x))
+    func = fmap (clenshaw (getChebCoef u)) linrange
+    nodes = Approx.List.extremalChebNodes 6
