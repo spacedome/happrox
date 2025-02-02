@@ -85,9 +85,24 @@ chebDf dim = build (m, m) f
     | i == j = -xi / (2 * (1 - xi ** 2))
     | otherwise = (-1 ** (i + j)) * c i / (c j * (xi - xj))
    where
+    -- hmatrix `build` only takes R -> R -> R so we have to round...
     xi = x ! round i :: R
     xj = x ! round j :: R
     c z
       | z == 0 = 2
       | z == n = 2
       | otherwise = 1
+
+
+data C = C {-# UNPACK #-} !R {-# UNPACK #-} !R
+{- | Evaluate a Chebyshev polynomial of the first kind. 
+Uses Clenshaw's algorithm.
+Implementation taken from `math-functions` package (BSD3) -}
+clenshaw :: ChebCoefs    -- ^ Coefficients of each polynomial term, in increasing order.
+          -> R       -- ^ point to evalute at
+          -> R
+clenshaw a x = fini . V.foldr' stpp (C 0 0) . V.tail $ a
+    where stpp k (C b0 b1) = C (k + x2 * b0 - b1) b0
+          fini   (C b0 b1) = V.head a + x * b0 - b1
+          x2               = x * 2
+{-# INLINE clenshaw #-}
