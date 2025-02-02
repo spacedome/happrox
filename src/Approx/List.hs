@@ -13,7 +13,7 @@ This module includes pedagogical examples of approximation algorithms,
 backed by Lists, without further dependencies, meant for clarity not performance.
 -}
 
-module Approx.List (Cheb (Cheb), extremalChebNodes, evalChebAtPoint, computeCheb, Function (Function)) where
+module Approx.List where
 
 import Data.Complex
 import Numeric.Natural

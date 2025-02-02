@@ -14,7 +14,7 @@ module Approx.Cheb where
 
 import Numeric.GSL.Fourier
 import Numeric.LinearAlgebra.Data
-import Numeric.LinearAlgebra ((#>))
+import Numeric.LinearAlgebra ((#>), (<\>))
 import Numeric.Natural
 import qualified Data.Vector.Generic as V
 
@@ -98,6 +98,31 @@ diffCheb :: Cheb -> Cheb
 diffCheb (Cheb c) = Cheb (d #> c)
   where n = V.length c - 1
         d = chebDf (fromIntegral n)
+
+-- | Boundary condition 
+data BC = DirichletBC R | NeumannBC R | MixedBC R R | UnconstrainedBC
+-- | Represent a Differential Linear Operator
+data DL = DL (Matrix R) BC BC
+
+(<\\>) :: DL -> Function -> Cheb
+(<\\>) (DL df lbc rbc) f = Cheb (dfbc <\> getNodes chebf)
+  where n = fromIntegral (rows df)
+        chebf = computeCheb f n
+        ldirichlet a xs = vector (a: replicate (fromIntegral n-1) 0.0) : tail xs
+        rdirichlet a xs = vector (replicate (fromIntegral n-1) 0.0 ++ [a]) : init xs
+        dfrows = toRows df
+        rows' = case lbc of
+          DirichletBC  alpha -> ldirichlet alpha dfrows
+          NeumannBC    alpha -> undefined
+          MixedBC alpha beta -> undefined
+          UnconstrainedBC    -> dfrows
+        row'' = case rbc of 
+          DirichletBC  alpha -> rdirichlet alpha rows'
+          NeumannBC    alpha -> undefined
+          MixedBC alpha beta -> undefined
+          UnconstrainedBC    -> rows'
+        dfbc = fromRows row''
+    
 
 data C = C {-# UNPACK #-} !R {-# UNPACK #-} !R
 {- | Evaluate a Chebyshev polynomial of the first kind. 
