@@ -62,6 +62,7 @@ library
     exposed-modules:  Approx.List
                     , Approx.Cheb
                     , Approx.Matrix
+                    , Approx.FEAST
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -74,6 +75,7 @@ library
                     , vector ^>=0.13
                     , hmatrix ^>=0.20
                     , hmatrix-gsl ^>=0.19
+                    , random ^>= 1.2.0
 
     -- Directories containing source files.
     hs-source-dirs:   src
