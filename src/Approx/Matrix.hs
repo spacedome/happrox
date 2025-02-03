@@ -1,8 +1,24 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# OPTIONS_GHC -fno-warn-unused-binds #-}
+
+{-|
+Module      : Approx.Matrix
+Description : Matrix algorithms
+Copyright   : (c) Julien Brenneck 2025
+License     : MIT
+Maintainer  : julien@spacedome.tv
+Stability   : experimental
+Portability : POSIX
+
+Some matrix algorithms of use in approximation theory and numerical analysis
+-}
 
 module Approx.Matrix where
 
 import Numeric.LinearAlgebra
+import Data.List (foldl')
+
+-- FIXME: Random broke the builds, commenting out for the moment...
 -- import System.Random (randomIO)
 -- iport Control.Monad (replicateM)
 
@@ -37,10 +53,12 @@ import Numeric.LinearAlgebra
 --   -- Average the estimates
 --   return $ sum estimates / fromIntegral numSamples
 
+-- | Normalize the columns of a matrix (in the 2-norm) 
 normColumns :: Matrix Double -> Matrix Double
 normColumns a =
   fromColumns $ fmap (\x -> x / scalar (norm_2 x)) (toColumns a)
 
+-- | Gram-Schmidt orthonormalization of a matrix
 gramSchmidt :: Matrix Double -> Matrix Double
 gramSchmidt a =
   fromColumns $ schmidt (toColumns a) []
@@ -53,4 +71,4 @@ gramSchmidt a =
     projV :: Vector Double -> Vector Double -> Vector Double
     projSub :: Vector Double -> [Vector Double] -> Vector Double
     projV v' u' = u' * scalar (v' <.> u')
-    projSub v' us' = normalize $ foldl (-) v' (fmap (projV v') us')
+    projSub v' us' = normalize $ foldl' (-) v' (fmap (projV v') us')

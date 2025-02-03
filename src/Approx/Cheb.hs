@@ -12,7 +12,7 @@ This module provides Chebyshev approximants backed by Vectors, using hmatrix.
 
 module Approx.Cheb where
 
-import Numeric.GSL.Fourier
+import Numeric.GSL.Fourier (fft, ifft)
 import Numeric.LinearAlgebra.Data
 import Numeric.LinearAlgebra ((#>), (<\>))
 import Numeric.Natural
@@ -94,20 +94,27 @@ chebDf dim = build (m, m) f
         | z == n = 2
         | otherwise = 1
 
+-- NOTE: This is just a convenience atm, should add better
+-- abstraction for constructing the differential operators
+-- | Compute the second order Chebyshev differentiation matrix
 chebDf2 :: Natural -> Matrix R
 chebDf2 dim = x <> x
   where x = chebDf dim
 
+-- | Differentiate a Cheb
 diffCheb :: Cheb -> Cheb
 diffCheb (Cheb c) = Cheb (d #> c)
   where n = V.length c - 1
         d = chebDf (fromIntegral n)
 
--- | Boundary condition 
+-- | Boundary condition types
+-- | Neumann and Mixed not currently implemented
 data BC = DirichletBC | NeumannBC | MixedBC | UnconstrainedBC
 -- | Represent a Differential Linear Operator
 data DL = DL (Matrix R) BC BC
 
+
+-- | Solve L u = f by computing u = L \ f
 (<\\>) :: DL -> Function -> Cheb
 (<\\>) (DL df lbc rbc) f = Cheb (dfbc <\> getNodes chebf)
   where n = fromIntegral (rows df) - 1
