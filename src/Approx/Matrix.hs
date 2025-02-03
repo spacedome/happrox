@@ -2,9 +2,9 @@
 
 module Approx.Matrix where
 
-import Control.Monad (replicateM)
 import Numeric.LinearAlgebra
 -- import System.Random (randomIO)
+-- iport Control.Monad (replicateM)
 
 -- -- | Generate a random Rademacher vector (+1/-1 with equal probability)
 -- generateRademacherVector :: Int -> IO (Vector R)
