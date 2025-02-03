@@ -1,13 +1,25 @@
 {-# LANGUAGE BangPatterns #-}
 
+{-|
+Module      : Approx.FEAST
+Description : FEAST type eigenvalue algorithms
+Copyright   : (c) Julien Brenneck 2025
+License     : MIT
+Maintainer  : julien@spacedome.tv
+Stability   : experimental
+Portability : POSIX
+
+Some basic FEAST type algorithms
+-}
+
+-- NOTE: I made this in about an hour with an LLM, so it's certified slop
+
 module Approx.FEAST where
 
 import Numeric.LinearAlgebra.HMatrix
 import Numeric.LinearAlgebra as L
 import System.Random (randomIO)
 import Control.Monad (replicateM)
-
-type MatrixC = Matrix C
 
 -- Generate a random real matrix converted to complex with zero imaginary parts
 randomRealMatrix :: Int -> Int -> IO (Matrix C)
@@ -29,13 +41,17 @@ computeY :: Matrix R -> [(C, C)] -> Matrix C -> Matrix C
 computeY a quadPoints x = sum (map processQuad quadPoints)
   where
     n = rows a
-    processQuad (z, w) = scalar w * (<\>) (mkResolvent z) (tr x)
+    processQuad (z, w) = scalar w * (mkResolvent z <\> x)
     mkResolvent z = diag (konst z n) - complex a
 
--- Orthonormalize Y using QR decomposition
+-- Thin QR decomposition to maintain subspace size
 orthonormalize :: Matrix C -> Matrix C
-orthonormalize y = q
-  where (q, _) = qr y
+orthonormalize y = subMatrix (0,0) (n, m0) q
+  where
+    (q, _) = qr y
+    n = rows y
+    m0 = cols y  -- Preserve original subspace dimension
+
 
 -- Project A onto the orthonormal basis Q
 projA :: Matrix C -> Matrix R -> Matrix C
@@ -61,7 +77,7 @@ feast a emin emax m0 nquad maxIter tol = do
         radius = (emax - emin) / 2 * 1.1  -- Slightly larger than the interval
         quadPoints = quadraturePoints center radius nquad
     -- Initial random subspace with real entries
-    xInit <- randomRealMatrix n m0
+    xInit <- randomRealMatrix m0 n
     let iterateStep !x !iter = do
             let y = computeY a quadPoints x
                 q = orthonormalize y
@@ -79,7 +95,7 @@ feast a emin emax m0 nquad maxIter tol = do
 -- Example usage with a diagonal matrix
 run :: IO ()
 run = do
-    let a = diag (fromList [1..50]) :: Matrix Double
+    let a = diag (fromList [1..10]) :: Matrix Double
         emin = 2.5
         emax = 4.5
         m0 = 2  -- Expect 2 eigenvalues in [2.5,4.5] (3 and 4)
