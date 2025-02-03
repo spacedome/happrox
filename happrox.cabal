@@ -61,6 +61,7 @@ library
     -- Modules exported by the library.
     exposed-modules:  Approx.List
                     , Approx.Cheb
+                    , Approx.Matrix
 
     -- Modules included in this library but not exported.
     -- other-modules:
